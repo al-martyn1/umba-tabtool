@@ -1,0 +1,1 @@
+.out\msvc2019\x64\Debug\umba-tabtool.exe --help > umba-tabtool.txt
