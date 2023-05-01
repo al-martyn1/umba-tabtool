@@ -236,7 +236,7 @@ int operator()( const std::string                               &a           //!
         }
 
         else if ( opt.setParam("?MODE",true)
-               || opt.isOption("remove-trailing-spaces") || opt.isOption('R') 
+               || opt.isOption("remove-trailing-spaces") || opt.isOption("strip-trailing-spaces") || opt.isOption('R') 
                // || opt.setParam("VAL",true)
                || opt.setDescription("Remove trailing spaces and tabs on each line"))
         {

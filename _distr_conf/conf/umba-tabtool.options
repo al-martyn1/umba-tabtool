@@ -1,3 +1,4 @@
+--strip-trailing-spaces
 --tab-size=4
 --tab-delta=1
 --overwrite=Y

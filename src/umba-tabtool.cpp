@@ -54,7 +54,7 @@ umba::StdStreamCharWriter coutWriter(std::cout);
 umba::StdStreamCharWriter cerrWriter(std::cerr);
 umba::NulCharWriter       nulWriter;
 
-umba::SimpleFormatter umbaLogStreamErr(&coutWriter);
+umba::SimpleFormatter umbaLogStreamErr(&cerrWriter);
 umba::SimpleFormatter umbaLogStreamMsg(&cerrWriter);
 umba::SimpleFormatter umbaLogStreamNul(&nulWriter);
 
@@ -232,10 +232,42 @@ int main(int argc, char* argv[])
 
         size_t errCount = 0;
 
+        bool bUpdated = false;
+        bool bTrStrip = false;
+
+        std::string strEmpty;
+
+
         for(; idx!=textLines.size(); ++idx)
         {
              std::string &line = textLines[idx];
              unsigned lineNo = (unsigned)idx+1;
+
+             bUpdated = false;
+             bTrStrip = false;
+
+             auto stripAndLog = [&](const std::string &msg)
+             {
+                 if (removeTrailings)
+                 {
+                     std::string newLine = marty_cpp::stripLineTrailingSpaces(line);
+                     if (line!=newLine)
+                         bTrStrip = true;
+
+                     line = newLine;
+                 }
+
+                 if (!argsParser.quet && (bUpdated||bTrStrip))
+                 {
+                     LOG_WARN("updated") 
+                         << "line updated: "
+                         << (bUpdated?msg:strEmpty)
+                         << (bUpdated&&bTrStrip?" and ":"")
+                         << (bTrStrip?"traling spaces stripped":"")
+                         << "\n";
+                 }
+             };
+
 
              switch(tabtoolCommand)
              {
@@ -264,11 +296,32 @@ int main(int argc, char* argv[])
                      }
                      else
                      {
-                         line = marty_cpp::expandTabsToSpaces(line, tabSize);
+                         std::string newLine = marty_cpp::expandTabsToSpaces(line, tabSize);
+                         if (line!=newLine)
+                             bUpdated = true;
+
+                         line = newLine;
+
+                         stripAndLog("tabs expanded");
+                         #if 0
                          if (removeTrailings)
                          {
-                             line = marty_cpp::stripLineTrailingSpaces(line);
+                             newLine = marty_cpp::stripLineTrailingSpaces(line);
+	                         if (line!=newLine)
+	                             bTrStrip = true;
+
+                             line = newLine;
                          }
+
+                         if (!argsParser.quet && (bUpdated||bTrStrip))
+                         {
+                             LOG_WARN("updated") 
+                                 << "line updated: "
+                                 << (bUpdated?"tabs expanded":"")
+                                 << (bUpdated&&bTrStrip?" and ":"")
+                                 << (bTrStrip?"traling spaces stripped":"")
+                         }
+                         #endif
                      }
                      break;
 
@@ -297,11 +350,20 @@ int main(int argc, char* argv[])
                      }
                      else
                      {
+                         std::string newLine = marty_cpp::condenseSpacesToTabs(line, tabSize, tabDelta);
+                         if (line!=newLine)
+                             bUpdated = true;
+
+                         line = newLine;
+
+                         stripAndLog("spaces condenced to tabs");
+                         #if 0
                          line = marty_cpp::condenseSpacesToTabs(line, tabSize, tabDelta);
                          if (removeTrailings)
                          {
                              line = marty_cpp::stripLineTrailingSpaces(line);
                          }
+                         #endif
                      }
                      break;
 
@@ -322,11 +384,18 @@ int main(int argc, char* argv[])
 	                     }
 	                     else
 	                     {
+	                         if (line!=newLine)
+	                             bUpdated = true;
+
                              line = newLine;
+
+                             stripAndLog("line normalized");
+                             #if 0
 	                         if (removeTrailings)
 	                         {
 	                             line = marty_cpp::stripLineTrailingSpaces(line);
 	                         }
+                             #endif
 	                     }
                      }
 
@@ -370,5 +439,5 @@ int main(int argc, char* argv[])
     }
 
     return 0;
-}
+}    
 
