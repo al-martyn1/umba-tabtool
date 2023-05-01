@@ -236,23 +236,6 @@ int operator()( const std::string                               &a           //!
         }
 
         else if ( opt.setParam("?MODE",true)
-               || opt.isOption("check") || opt.isOption('K')
-               // || opt.setParam("VAL",true)
-               || opt.setDescription("Perform check only, do not write results to output"))
-        {
-            if (argsParser.hasHelpOption) return 0;
-
-            if (!opt.getParamValue(boolVal,errMsg))
-            {
-                LOG_ERR_OPT<<errMsg<<"\n";
-                return -1;
-            }
-            
-            checkMode = boolVal;
-            return 0;
-        }
-
-        else if ( opt.setParam("?MODE",true)
                || opt.isOption("remove-trailing-spaces") || opt.isOption('R') 
                // || opt.setParam("VAL",true)
                || opt.setDescription("Remove trailing spaces and tabs on each line"))
@@ -269,13 +252,68 @@ int operator()( const std::string                               &a           //!
             return 0;
         }
 
+        else if ( opt.setParam("?MODE",true)
+               || opt.isOption("check") || opt.isOption('K')
+               // || opt.setParam("VAL",true)
+               || opt.setDescription("Perform check only, do not write results to output. Performed action depends on taken command:\n"
+                                     "'tab'/'tab-convert' - check for leading tabs only\n"
+                                     "'space'/'space-convert' - check for leading spaces only\n"
+                                     "'norm'/'normalize' - normalized line must be exact equal to source line"
+                                     ""
+                                     ""
+                                     // ведущие - только табы
+                                    )
+               )
+        {
+            if (argsParser.hasHelpOption) return 0;
+
+            if (!opt.getParamValue(boolVal,errMsg))
+            {
+                LOG_ERR_OPT<<errMsg<<"\n";
+                return -1;
+            }
+            
+            checkMode = boolVal;
+            return 0;
+        }
+
+        else if ( opt.isOption("tab-convert") || opt.isOption("tab")
+               // || opt.setParam("VAL",true)
+               || opt.setDescription("Same as --command=tab-convert")
+               )
+        {
+            if (argsParser.hasHelpOption) return 0;
+            tabtoolCommand = ETabToolCommand::tabConvert;
+            return 0;
+        }
+
+        else if ( opt.isOption("space-convert") || opt.isOption("space")
+               // || opt.setParam("VAL",true)
+               || opt.setDescription("Same as --command=space-convert")
+               )
+        {
+            if (argsParser.hasHelpOption) return 0;
+            tabtoolCommand = ETabToolCommand::spaceConvert;
+            return 0;
+        }
+
+        else if ( opt.isOption("normalize") || opt.isOption("norm")
+               // || opt.setParam("VAL",true)
+               || opt.setDescription("Same as --command=normalize")
+               )
+        {
+            if (argsParser.hasHelpOption) return 0;
+            tabtoolCommand = ETabToolCommand::normalizeIndent;
+            return 0;
+        }
+
         else if ( opt.setParam("CMD",umba::command_line::OptionType::optString)
                || opt.isOption("command") || opt.isOption("cmd") || opt.isOption('C')
                // || opt.setParam("VAL",true)
                || opt.setDescription("Action command CMD can be:\n"
                                      "'tab'/'tab-convert' - convert tabs to spaces\n"
                                      "'space'/'space-convert' - convert spaces to tabs\n"
-                                     "'norm'/'normalize' - normalize spaces to tab size - 4/8/12/16/etc for tab-size=4"
+                                     "'norm'/'normalize' - normalize spaces to tab size - 4/8/12/16/etc spaces for tab-size=4"
                                     )
                )
         {

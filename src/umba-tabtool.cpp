@@ -195,7 +195,7 @@ int main(int argc, char* argv[])
         //------------------------------
        
         // Do job itself
-        auto startTick = umba::time_service::getCurTimeMs();
+        // auto startTick = umba::time_service::getCurTimeMs();
 
        
         ELinefeedType detectedSrcLinefeed = ELinefeedType::crlf;
@@ -213,41 +213,160 @@ int main(int argc, char* argv[])
             outputLinefeed = ELinefeedType::crlf;
         }
         #endif
-       
-        #if 0
+
         std::vector<std::string> textLines = marty_cpp::splitToLinesSimple( lfNormalizedText
                                                                           , true // addEmptyLineAfterLastLf
                                                                           , '\n' // lfChar
                                                                           );
-       
-        std::vector<std::string> sortedLines = marty_cpp::sortIncludes(textLines, sortIncludeOptions);
-       
-        std::string resultText = marty_cpp::mergeLines(sortedLines, outputLinefeed, false /* addTrailingNewLine */);
-        #else
 
-        std::string resultText = srcData;
 
-        #endif
+
+        //----------------------------------------------------------------------------
+        if (tabtoolCommand==ETabToolCommand::invalid)
+            throw std::runtime_error("no command taken. Use --command to specify tabtool action");
+
+        //std::vector<std::string> resLines = textLines;
+
+        const std::string &curFile = inputFilename;
+        size_t idx = 0;
+
+        size_t errCount = 0;
+
+        for(; idx!=textLines.size(); ++idx)
+        {
+             std::string &line = textLines[idx];
+             unsigned lineNo = (unsigned)idx+1;
+
+             switch(tabtoolCommand)
+             {
+                 case ETabToolCommand::tabConvert: // convert tabs to spaces
+                     if (checkMode)
+                     {
+                         // ведущие - только табы
+                         std::size_t pos = 0;
+                         for(auto ch: line)
+                         {
+                             ++pos;
+                             if (ch=='\t')
+                                 continue;
+
+                             if (ch==' ')
+                             {
+                                 ++errCount;
+                                 if (!argsParser.quet)
+                                 {
+                                     LOG_ERR << "found space char at pos " << pos << " while only tabs allowed\n";
+                                 }
+                             }
+                         
+                             break;
+                         }
+                     }
+                     else
+                     {
+                         line = marty_cpp::expandTabsToSpaces(line, tabSize);
+                         if (removeTrailings)
+                         {
+                             line = marty_cpp::stripLineTrailingSpaces(line);
+                         }
+                     }
+                     break;
+
+                 case ETabToolCommand::spaceConvert: // convert spaces to tabs
+                     if (checkMode)
+                     {
+                         // ведущие - только пробелы
+                         std::size_t pos = 0;
+                         for(auto ch: line)
+                         {
+                             ++pos;
+                             if (ch==' ')
+                                 continue;
+
+                             if (ch=='\t')
+                             {
+                                 ++errCount;
+                                 if (!argsParser.quet)
+                                 {
+                                     LOG_ERR << "found tab char at pos " << pos << " while only spaces allowed\n";
+                                 }
+                             }
+                         
+                             break;
+                         }
+                     }
+                     else
+                     {
+                         line = marty_cpp::condenseSpacesToTabs(line, tabSize, tabDelta);
+                         if (removeTrailings)
+                         {
+                             line = marty_cpp::stripLineTrailingSpaces(line);
+                         }
+                     }
+                     break;
+
+                 case ETabToolCommand::normalizeIndent: // normalize spaces to tab size
+                     {
+                         std::string newLine = marty_cpp::normalizeIndents(line, tabSize, tabDelta);
+                         if (checkMode)
+	                     {
+	                         // проверяет равенство каждой строки до и после обработки
+                             if (line!=newLine)
+                             {
+                                 ++errCount;
+                                 if (!argsParser.quet)
+                                 {
+                                     LOG_ERR << "line not normalized by leading spaces\n";
+                                 }
+                             }
+	                     }
+	                     else
+	                     {
+                             line = newLine;
+	                         if (removeTrailings)
+	                         {
+	                             line = marty_cpp::stripLineTrailingSpaces(line);
+	                         }
+	                     }
+                     }
+
+                     break;
+
+             } // switch
+
+        } // for
+
+        
+        std::string resultText = marty_cpp::mergeLines(textLines, outputLinefeed, false /* addTrailingNewLine */);
 
         //------------------------------
 
-        umba::cli_tool_helpers::writeOutput( outputFilename, outputFileType
-                                           , encoding::ToUtf8(), encoding::FromUtf8()
-                                           , resultText, bomData
-                                           , fromFile, utfSource, bOverwrite
-                                           );
-
-        auto endTick = umba::time_service::getCurTimeMs();
-        if (!argsParser.quet)
+        if (!checkMode)
         {
-            LOG_MSG_OPT << "    time: " << (endTick-startTick) << "ms\n";
+            umba::cli_tool_helpers::writeOutput( outputFilename, outputFileType
+	                                           , encoding::ToUtf8(), encoding::FromUtf8()
+	                                           , resultText, bomData
+	                                           , fromFile, utfSource, bOverwrite
+	                                           );
         }
+        else
+        {
+            if (errCount)
+                return 2;
+        }
+
+        // auto endTick = umba::time_service::getCurTimeMs();
+        // if (!argsParser.quet)
+        // {
+        //     LOG_MSG_OPT << "    time: " << (endTick-startTick) << "ms\n";
+        // }
 
 
     } // try
     catch(const std::runtime_error &e)
     {
         LOG_ERR_OPT << e.what() << "\n";
+        return 1;
     }
 
     return 0;

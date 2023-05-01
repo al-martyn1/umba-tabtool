@@ -4,6 +4,7 @@
 
 
 // source parsing errors
+// requires std::stringr curFile, unsigned lineNo in log scope
 #define LOG_ERR                      UMBA_LOG_ERR_INPUT
 #define LOG_WARN(warnType)           UMBA_LOG_WARN_INPUT(warnType)
 
