@@ -259,8 +259,6 @@ int operator()( const std::string                               &a           //!
                                      "'tab'/'tab-convert' - check for leading tabs only\n"
                                      "'space'/'space-convert' - check for leading spaces only\n"
                                      "'norm'/'normalize' - normalized line must be exact equal to source line"
-                                     ""
-                                     ""
                                      // ведущие - только табы
                                     )
                )
@@ -274,6 +272,26 @@ int operator()( const std::string                               &a           //!
             }
             
             checkMode = boolVal;
+            return 0;
+        }
+
+        else if ( opt.setParam("?MODE",true)
+               || opt.isOption("check-all")
+               // || opt.setParam("VAL",true)
+               || opt.setDescription("Do not stop on errors in check mode"
+                                     // ведущие - только табы
+                                    )
+               )
+        {
+            if (argsParser.hasHelpOption) return 0;
+
+            if (!opt.getParamValue(boolVal,errMsg))
+            {
+                LOG_ERR_OPT<<errMsg<<"\n";
+                return -1;
+            }
+            
+            checkAll = boolVal;
             return 0;
         }
 

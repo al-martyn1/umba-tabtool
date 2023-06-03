@@ -68,6 +68,7 @@ bool bOverwrite    = false;
 std::size_t tabSize  = 4;
 std::size_t tabDelta = -1;
 bool checkMode = false;
+bool checkAll  = false;
 bool removeTrailings = false;
 
 // std::string inputFilename;
@@ -471,9 +472,9 @@ int main(int argc, char* argv[])
                                                        , fromFile, utfSource, bOverwrite
                                                        );
                 }
-                else
+                else // checkMode
                 {
-                    if (errCount)
+                    if (errCount && !checkAll)
                         return 2;
                 }
            
@@ -491,7 +492,7 @@ int main(int argc, char* argv[])
                 return 1;
             }
 
-        }
+        } // for(auto &filenamePair : filenamePairs)
 
     } // try
     catch(const std::runtime_error &e)
