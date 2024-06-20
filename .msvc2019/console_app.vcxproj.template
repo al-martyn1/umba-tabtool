@@ -1,23 +1,26 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{5F88E9C5-2180-4D61-ACA9-A40AC2766220}</ProjectGuid>
+    <ProjectGuid>{001634AE-5567-412E-ACEC-6EC488026C66}</ProjectGuid>
   </PropertyGroup>
+
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <Import Project=".\props\umba_project_configurations.props" />
-  <Import Project=".\props\umba_msvcver.props" />
-  <Import Project=".\props\umba_target_console.props" />
-  <Import Project=".\props\umba_config_matrix_common.props" />
+  <Import Project="$(MSBuildThisFileDirectory)\..\.msvc\umba_project_configurations.props" />
+  <Import Project="$(MSBuildThisFileDirectory)\..\.msvc\umba_msvcver.props" />
+  <Import Project="$(MSBuildThisFileDirectory)\..\.msvc\umba_target_console.props" />
+  <Import Project="$(MSBuildThisFileDirectory)\..\.msvc\umba_config_matrix_common.props" />
   <!--Import Project=".\umba_config_matrix_qt.props" /-->
   <Import Project=".\umba_prjdirs.props" />
   <Import Project=".\umba_prjdefs.props" />
+
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <PropertyGroup>
-    <IncludePath>$(UMBA_INC_DIRS);$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)\..\_libs\encoding</IncludePath>
+    <IncludePath>$(UMBA_INC_DIRS);$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
   </PropertyGroup>
   <ImportGroup Label="ExtensionSettings" />
   <ImportGroup Label="Shared" />
-  <ImportGroup Label="PropertySheets">
+  <ImportGroup Label="PropertySheets" >
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
@@ -30,10 +33,9 @@
       <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
+
   <ItemGroup>
-    <ClCompile Include="..\_libs\umba\critical_section.cpp" />
-    <ClCompile Include="..\_libs\umba\time_service.cpp" />
-    <ClCompile Include="..\src\umba-tabtool.cpp" />
+    <ClCompile Include="..\src\tests\$(TEST_NAME).cpp" />
     <ClCompile Include="..\_libs\sfmt\umba_lout.cpp" />
     <ClCompile Include="..\_libs\encoding\encoding.cpp" />
     <ClCompile Include="..\_libs\encoding\compact_enc_det\compact_enc_det.cc" />
