@@ -3,3 +3,4 @@
 /_prj_msvc/*.user
 /_prj_msvc/*.vcxproj_bak
 /test-util.bat
+*.user
